@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"os"
+
+	myhttp "github.com/codecrafters-io/http-server-starter-go/app/my_http"
 )
 
 func main() {
@@ -23,6 +26,16 @@ func main() {
 		os.Exit(1)
 	}
 	defer conn.Close()
+
+	r := bufio.NewReader(conn)
+	request, err := myhttp.FromReader(r)
+	if err != nil {
+		fmt.Println("Encountered an error", err)
+		return
+	}
+
+	fmt.Println("TESTING")
+	fmt.Println(request)
 
 	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 }
