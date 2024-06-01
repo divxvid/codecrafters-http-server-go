@@ -1,6 +1,7 @@
 package myhttp
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io"
@@ -19,32 +20,38 @@ const (
 )
 
 type HTTPRequest struct {
-	requestLine RequestLine
-	headers     map[string]string
-	body        []byte
+	RequestLine RequestLine
+	Headers     map[string]string
+	Body        []byte
 }
 
 type RequestLine struct {
-	httpMethod HttpMethod
-	target     string
-	version    string
+	HttpMethod HttpMethod
+	Target     string
+	Version    string
 }
 
 func FromReader(r io.Reader) (*HTTPRequest, error) {
 	var buf []byte
 	buffer := bytes.NewBuffer(buf)
 
-	_, err := r.Read(buffer.Bytes())
+	reader := bufio.NewReader(r)
+	tmp := make([]byte, 2048)
+	n, err := reader.Read(tmp)
 	if err != nil {
-		err := fmt.Errorf("Cannot read bytes from the reader. Failed with error: %v", err)
+		err := fmt.Errorf("There was some error while reading from the socket. err: %v\n", err)
 		return nil, err
 	}
+	buffer.Write(tmp[:n])
 
 	dataStr := buffer.String()
-	//to split between the payload and the header part
 	sections := strings.Split(dataStr, "\r\n\r\n")
 	headerPart := sections[0]
-	payloadPart := sections[1]
+
+	var payloadPart string
+	if len(sections) > 1 {
+		payloadPart = sections[1]
+	}
 
 	headerSections := strings.Split(headerPart, "\r\n")
 	if len(sections) == 0 {
@@ -72,18 +79,20 @@ func FromReader(r io.Reader) (*HTTPRequest, error) {
 
 	headers := make(map[string]string)
 	for _, line := range headerSections[1:] {
-		parts := strings.SplitN(line, ":", 1)
-		headers[parts[0]] = parts[1]
+		parts := strings.SplitN(line, ":", 2)
+		key := strings.TrimSpace(parts[0])
+		value := strings.TrimSpace(parts[1])
+		headers[key] = value
 	}
 
 	return &HTTPRequest{
-		requestLine: RequestLine{
-			httpMethod: method,
-			target:     requestLineStr[1],
-			version:    requestLineStr[2],
+		RequestLine: RequestLine{
+			HttpMethod: method,
+			Target:     requestLineStr[1],
+			Version:    requestLineStr[2],
 		},
-		headers: headers,
-		body:    []byte(payloadPart),
+		Headers: headers,
+		Body:    []byte(payloadPart),
 	}, nil
 }
 
@@ -92,7 +101,7 @@ func (hr *HTTPRequest) String() string {
 	buffer := bytes.NewBuffer(buf)
 
 	var method string
-	switch hr.requestLine.httpMethod {
+	switch hr.RequestLine.HttpMethod {
 	case GET:
 		method = "GET"
 	case PUT:
@@ -108,18 +117,18 @@ func (hr *HTTPRequest) String() string {
 	}
 
 	buffer.WriteString(method + "\n")
-	buffer.WriteString(hr.requestLine.target + "\n")
-	buffer.WriteString(hr.requestLine.version + "\n")
+	buffer.WriteString(hr.RequestLine.Target + "\n")
+	buffer.WriteString(hr.RequestLine.Version + "\n")
 
 	buffer.WriteString("\n")
 
-	for key, value := range hr.headers {
+	for key, value := range hr.Headers {
 		buffer.WriteString(fmt.Sprintf("%s: %s\n", key, value))
 	}
 
 	buffer.WriteString("\n")
 
-	buffer.Write(hr.body)
+	buffer.Write(hr.Body)
 
 	return buffer.String()
 }

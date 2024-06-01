@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"net"
 	"os"
@@ -20,22 +19,31 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn, err := l.Accept()
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			os.Exit(1)
+		}
+		defer conn.Close()
+
+		request, err := myhttp.FromReader(conn)
+		if err != nil {
+			fmt.Println("Encountered an error", err)
+			os.Exit(1)
+		}
+
+		if request == nil {
+			//for the first test
+			conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+			continue
+		}
+
+		if request.RequestLine.Target == "/" {
+			conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+		} else {
+			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+		}
+
 	}
-	defer conn.Close()
-
-	r := bufio.NewReader(conn)
-	request, err := myhttp.FromReader(r)
-	if err != nil {
-		fmt.Println("Encountered an error", err)
-		return
-	}
-
-	fmt.Println("TESTING")
-	fmt.Println(request)
-
-	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
 }
