@@ -33,14 +33,6 @@ func main() {
 			os.Exit(1)
 		}
 
-		if request == nil {
-			//for the first test
-			myhttp.NewHttpResponseBuilder().
-				Build().
-				WriteToConn(conn)
-			continue
-		}
-
 		if request.RequestLine.Target == "/" {
 			myhttp.NewHttpResponseBuilder().
 				Build().
