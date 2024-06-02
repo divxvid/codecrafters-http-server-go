@@ -35,14 +35,22 @@ func main() {
 
 		if request == nil {
 			//for the first test
-			conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+			myhttp.NewHttpResponseBuilder().
+				Build().
+				WriteToConn(conn)
 			continue
 		}
 
 		if request.RequestLine.Target == "/" {
-			conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+			myhttp.NewHttpResponseBuilder().
+				Build().
+				WriteToConn(conn)
 		} else {
-			conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+			myhttp.NewHttpResponseBuilder().
+				WithStatusCode(404).
+				WithStatusText("Not Found").
+				Build().
+				WriteToConn(conn)
 		}
 
 	}
