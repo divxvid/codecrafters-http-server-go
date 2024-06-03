@@ -50,8 +50,14 @@ func main() {
 
 			myhttp.NewHttpResponseBuilder().
 				WithHeader("Content-Type", "text/plain").
-				WithHeader("Content-Length", fmt.Sprintf("%d", len(value))).
 				WithBody([]byte(value)).
+				Build().
+				WriteToConn(conn)
+		} else if pathParams[0] == "user-agent" {
+			body := []byte(request.Headers["User-Agent"])
+			myhttp.NewHttpResponseBuilder().
+				WithHeader("Content-Type", "text/plain").
+				WithBody(body).
 				Build().
 				WriteToConn(conn)
 		} else {

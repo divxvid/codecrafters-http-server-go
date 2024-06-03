@@ -57,6 +57,7 @@ func (b *HttpResponseBuilder) WithHeader(key, value string) *HttpResponseBuilder
 }
 
 func (b *HttpResponseBuilder) WithBody(body []byte) *HttpResponseBuilder {
+	b = b.WithHeader("Content-Length", fmt.Sprintf("%d", len(body)))
 	b.Body = body
 	return b
 }
