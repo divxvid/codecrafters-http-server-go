@@ -2,7 +2,7 @@ package myhttp
 
 import "fmt"
 
-type HandlerFunc func(*HttpRequest) HttpResponse
+type HandlerFunc func(*HttpContext) HttpResponse
 
 type Router struct {
 	routes map[string]HandlerFunc
@@ -49,6 +49,7 @@ func (r *Router) HandleRequest(request *HttpRequest) HttpResponse {
 	)
 
 	f := r.routes[routeKey]
-	response := f(request)
+	ctx := NewHttpContext(request)
+	response := f(ctx)
 	return response
 }
