@@ -51,9 +51,8 @@ func (s *Server) ProcessConnection(conn net.Conn) {
 		return
 	}
 
-	//NOTE: ignoring the error for now
 	response, err := s.Router.HandleRequest(request)
-	if err != nil {
+	if response == nil {
 		//INFO: just returning a 404 for codecrafters
 		NewHttpResponseBuilder().
 			WithStatusCode(404).

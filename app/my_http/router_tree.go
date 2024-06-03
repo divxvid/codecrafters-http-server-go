@@ -88,7 +88,7 @@ func (rt RouterTree) GetHandler(ctx *HttpContext) (HandlerFunc, error) {
 		if !found {
 			//it might be a path parameter, so let's see if children
 			//has any path params
-
+			hasChildWithPathParam := false
 			for _, child := range trav.children {
 				if child.isPathParam {
 					//if we get a path param, we will update the
@@ -97,8 +97,13 @@ func (rt RouterTree) GetHandler(ctx *HttpContext) (HandlerFunc, error) {
 
 					ctx.pathParams[child.segment] = segment
 					trav = child
+					hasChildWithPathParam = true
 					break
 				}
+			}
+
+			if !hasChildWithPathParam {
+				return nil, fmt.Errorf("Could not find handler function for this prefix")
 			}
 			continue
 		}
