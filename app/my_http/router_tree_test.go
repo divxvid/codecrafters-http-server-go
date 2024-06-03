@@ -2,7 +2,7 @@ package myhttp
 
 import "testing"
 
-func TestRouterTree(t *testing.T) {
+func TestRouterTreeGood(t *testing.T) {
 	rt := NewRouterTree()
 	rt.Add("/", func(hc *HttpContext) HttpResponse {
 		return *NewHttpResponseBuilder().
@@ -100,5 +100,19 @@ func TestRouterTree(t *testing.T) {
 	}
 	if c4.pathParams["third"] != "cool" {
 		t.Fatalf("Path Params are wrong. Want: cool, Got: %s", c4.pathParams["first"])
+	}
+}
+
+func TestRouterTreeBad(t *testing.T) {
+	rt := NewRouterTree()
+
+	c := NewHttpContext(&HttpRequest{
+		RequestLine: RequestLine{
+			Target: "Omega",
+		},
+	})
+	_, err := rt.GetHandler(c)
+	if err == nil {
+		t.Fatalf("Error is not nil when the route is absent.")
 	}
 }
