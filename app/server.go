@@ -17,7 +17,14 @@ func main() {
 	})
 	router.GET("/echo/:data", func(ctx *myhttp.HttpContext) myhttp.HttpResponse {
 		return *myhttp.NewHttpResponseBuilder().
+			WithHeader("Content-Type", "text/plain").
 			WithBody([]byte(ctx.PathParam("data"))).
+			Build()
+	})
+	router.GET("/user-agent", func(ctx *myhttp.HttpContext) myhttp.HttpResponse {
+		return *myhttp.NewHttpResponseBuilder().
+			WithHeader("Content-Type", "text/plain").
+			WithBody([]byte(ctx.GetRequestHeader("User-Agent"))).
 			Build()
 	})
 

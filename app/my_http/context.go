@@ -15,3 +15,7 @@ func NewHttpContext(req *HttpRequest) *HttpContext {
 func (ctx *HttpContext) PathParam(key string) string {
 	return ctx.pathParams[key]
 }
+
+func (ctx *HttpContext) GetRequestHeader(key string) string {
+	return ctx.request.Headers[key]
+}
