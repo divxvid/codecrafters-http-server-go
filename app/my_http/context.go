@@ -11,3 +11,7 @@ func NewHttpContext(req *HttpRequest) *HttpContext {
 		pathParams: make(map[string]string),
 	}
 }
+
+func (ctx *HttpContext) PathParam(key string) string {
+	return ctx.pathParams[key]
+}

@@ -28,7 +28,7 @@ func (s *Server) Start(host string, port int) error {
 		return err
 	}
 	s.Listener = listener
-	go s.AcceptLoop()
+	s.AcceptLoop()
 	return nil
 }
 
@@ -51,6 +51,16 @@ func (s *Server) ProcessConnection(conn net.Conn) {
 		return
 	}
 
-	response := s.Router.HandleRequest(request)
-	response.WriteToConn(conn)
+	//NOTE: ignoring the error for now
+	response, err := s.Router.HandleRequest(request)
+	if err != nil {
+		//INFO: just returning a 404 for codecrafters
+		NewHttpResponseBuilder().
+			WithStatusCode(404).
+			WithStatusText("Not Found").
+			Build().
+			WriteToConn(conn)
+	} else {
+		response.WriteToConn(conn)
+	}
 }

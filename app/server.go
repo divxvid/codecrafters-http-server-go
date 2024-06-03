@@ -16,7 +16,9 @@ func main() {
 		return *myhttp.NewHttpResponseBuilder().Build()
 	})
 	router.GET("/echo/:data", func(ctx *myhttp.HttpContext) myhttp.HttpResponse {
-		return *myhttp.NewHttpResponseBuilder().Build()
+		return *myhttp.NewHttpResponseBuilder().
+			WithBody([]byte(ctx.PathParam("data"))).
+			Build()
 	})
 
 	server := myhttp.NewServer(router)

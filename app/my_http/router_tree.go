@@ -31,7 +31,7 @@ func NewRouterTree() RouterTree {
 	}
 }
 
-func (rt *RouterTree) Add(path string, f HandlerFunc) error {
+func (rt RouterTree) Add(path string, f HandlerFunc) error {
 	splitPath := strings.Split(path, "/")
 	splitPath[0] = "/"
 	length := len(splitPath)
@@ -73,7 +73,7 @@ func (rt *RouterTree) Add(path string, f HandlerFunc) error {
 }
 
 // here we are passing the real target string obtained from request
-func (rt *RouterTree) GetHandler(ctx *HttpContext) (HandlerFunc, error) {
+func (rt RouterTree) GetHandler(ctx *HttpContext) (HandlerFunc, error) {
 	splitPath := strings.Split(ctx.request.RequestLine.Target, "/")
 	splitPath[0] = "/"
 	length := len(splitPath)
