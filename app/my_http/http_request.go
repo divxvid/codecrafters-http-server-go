@@ -8,30 +8,19 @@ import (
 	"strings"
 )
 
-type HttpMethod int
-
-const (
-	GET HttpMethod = iota
-	POST
-	PUT
-	PATCH
-	DELETE
-	UNKNOWN
-)
-
-type HTTPRequest struct {
+type HttpRequest struct {
 	RequestLine RequestLine
 	Headers     map[string]string
 	Body        []byte
 }
 
 type RequestLine struct {
-	HttpMethod HttpMethod
+	HttpMethod string
 	Target     string
 	Version    string
 }
 
-func FromReader(r io.Reader) (*HTTPRequest, error) {
+func FromReader(r io.Reader) (*HttpRequest, error) {
 	var buf []byte
 	buffer := bytes.NewBuffer(buf)
 
@@ -61,22 +50,6 @@ func FromReader(r io.Reader) (*HTTPRequest, error) {
 
 	requestLineStr := strings.Split(headerSections[0], " ")
 
-	var method HttpMethod
-	switch requestLineStr[0] {
-	case "GET":
-		method = GET
-	case "PUT":
-		method = PUT
-	case "PATCH":
-		method = PATCH
-	case "POST":
-		method = POST
-	case "DELETE":
-		method = DELETE
-	default:
-		method = UNKNOWN
-	}
-
 	headers := make(map[string]string)
 	for _, line := range headerSections[1:] {
 		parts := strings.SplitN(line, ":", 2)
@@ -85,9 +58,9 @@ func FromReader(r io.Reader) (*HTTPRequest, error) {
 		headers[key] = value
 	}
 
-	return &HTTPRequest{
+	return &HttpRequest{
 		RequestLine: RequestLine{
-			HttpMethod: method,
+			HttpMethod: strings.TrimSpace(requestLineStr[0]),
 			Target:     strings.TrimSpace(requestLineStr[1]),
 			Version:    strings.TrimSpace(requestLineStr[2]),
 		},
@@ -96,27 +69,11 @@ func FromReader(r io.Reader) (*HTTPRequest, error) {
 	}, nil
 }
 
-func (hr *HTTPRequest) String() string {
+func (hr *HttpRequest) String() string {
 	var buf []byte
 	buffer := bytes.NewBuffer(buf)
 
-	var method string
-	switch hr.RequestLine.HttpMethod {
-	case GET:
-		method = "GET"
-	case PUT:
-		method = "PUT"
-	case POST:
-		method = "POST"
-	case PATCH:
-		method = "PATCH"
-	case DELETE:
-		method = "DELETE"
-	case UNKNOWN:
-		method = "UNKNOWN"
-	}
-
-	buffer.WriteString(method + "\n")
+	buffer.WriteString(hr.RequestLine.HttpMethod + "\n")
 	buffer.WriteString(hr.RequestLine.Target + "\n")
 	buffer.WriteString(hr.RequestLine.Version + "\n")
 
@@ -133,7 +90,7 @@ func (hr *HTTPRequest) String() string {
 	return buffer.String()
 }
 
-func (hr *HTTPRequest) PathParams() []string {
+func (hr *HttpRequest) PathParams() []string {
 	params := strings.Split(hr.RequestLine.Target, "/")[1:] //ignore the first space
 	length := len(params)
 	if length > 0 && params[length-1] == "" {
