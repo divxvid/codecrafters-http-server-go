@@ -132,3 +132,11 @@ func (hr *HTTPRequest) String() string {
 
 	return buffer.String()
 }
+
+func (hr *HTTPRequest) PathParams() []string {
+	params := strings.Split(hr.RequestLine.Target, "/")
+	if len(params) > 0 && params[len(params)-1] == "" {
+		params = params[:len(params)-1]
+	}
+	return params
+}

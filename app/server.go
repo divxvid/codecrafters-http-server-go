@@ -33,7 +33,11 @@ func main() {
 			os.Exit(1)
 		}
 
-		if request.RequestLine.Target == "/" {
+		pathParams := request.PathParams()
+		fmt.Println("Path Params: ", pathParams)
+
+		if len(pathParams) == 0 {
+			//root path
 			myhttp.NewHttpResponseBuilder().
 				Build().
 				WriteToConn(conn)
