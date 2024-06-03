@@ -34,7 +34,6 @@ func main() {
 		}
 
 		pathParams := request.PathParams()
-		fmt.Println("Path Params: ", pathParams)
 
 		if len(pathParams) == 0 {
 			//root path

@@ -88,8 +88,8 @@ func FromReader(r io.Reader) (*HTTPRequest, error) {
 	return &HTTPRequest{
 		RequestLine: RequestLine{
 			HttpMethod: method,
-			Target:     requestLineStr[1],
-			Version:    requestLineStr[2],
+			Target:     strings.TrimSpace(requestLineStr[1]),
+			Version:    strings.TrimSpace(requestLineStr[2]),
 		},
 		Headers: headers,
 		Body:    []byte(payloadPart),
@@ -134,9 +134,10 @@ func (hr *HTTPRequest) String() string {
 }
 
 func (hr *HTTPRequest) PathParams() []string {
-	params := strings.Split(hr.RequestLine.Target, "/")
-	if len(params) > 0 && params[len(params)-1] == "" {
-		params = params[:len(params)-1]
+	params := strings.Split(hr.RequestLine.Target, "/")[1:] //ignore the first space
+	length := len(params)
+	if length > 0 && params[length-1] == "" {
+		params = params[:length-1]
 	}
 	return params
 }
