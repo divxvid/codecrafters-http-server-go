@@ -41,6 +41,20 @@ func main() {
 			myhttp.NewHttpResponseBuilder().
 				Build().
 				WriteToConn(conn)
+		} else if pathParams[0] == "echo" {
+			var value string
+			if len(pathParams) < 2 {
+				value = ""
+			} else {
+				value = pathParams[1]
+			}
+
+			myhttp.NewHttpResponseBuilder().
+				WithHeader("Content-Type", "text/plain").
+				WithHeader("Content-Length", fmt.Sprintf("%d", len(value))).
+				WithBody([]byte(value)).
+				Build().
+				WriteToConn(conn)
 		} else {
 			myhttp.NewHttpResponseBuilder().
 				WithStatusCode(404).
