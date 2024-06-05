@@ -69,14 +69,15 @@ func handleEcho(ctx *myhttp.HttpContext) myhttp.HttpResponse {
 	buffer := bytes.NewBuffer(b)
 
 	gzipWriter := gzip.NewWriter(buffer)
-	defer gzipWriter.Close()
-
 	_, err := gzipWriter.Write([]byte(ctx.PathParam("data")))
+
 	if err != nil {
 		fmt.Printf("Error writing compressed data to buffer. err: %v\n", err)
 		buffer.Reset()
 		buffer.Write([]byte(ctx.PathParam("data")))
 	}
+
+	gzipWriter.Close()
 
 	return *myhttp.NewHttpResponseBuilder().
 		WithHeader("Content-Type", "text/plain").
