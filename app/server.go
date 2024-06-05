@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"compress/gzip"
 	"errors"
 	"flag"
 	"fmt"
@@ -11,6 +9,7 @@ import (
 	"strings"
 
 	myhttp "github.com/codecrafters-io/http-server-starter-go/app/my_http"
+	"github.com/codecrafters-io/http-server-starter-go/app/utils"
 )
 
 var directory *string
@@ -49,40 +48,19 @@ func handleEcho(ctx *myhttp.HttpContext) myhttp.HttpResponse {
 	encodingValues := ctx.GetRequestHeader("Accept-Encoding")
 	encodings := strings.Split(encodingValues, ",")
 
-	var hasGzip bool = false
-	for _, e := range encodings {
-		e = strings.TrimSpace(e)
-		if e == "gzip" {
-			hasGzip = true
-			break
-		}
-	}
-
-	if !hasGzip {
+	compressor := utils.NewCompressor()
+	data, err, selectedEncoding := compressor.Compress(encodings, []byte(ctx.PathParam("data")))
+	if err != nil {
 		return *myhttp.NewHttpResponseBuilder().
 			WithHeader("Content-Type", "text/plain").
-			WithBody([]byte(ctx.PathParam("data"))).
+			WithBody(data).
 			Build()
 	}
 
-	var b []byte
-	buffer := bytes.NewBuffer(b)
-
-	gzipWriter := gzip.NewWriter(buffer)
-	_, err := gzipWriter.Write([]byte(ctx.PathParam("data")))
-
-	if err != nil {
-		fmt.Printf("Error writing compressed data to buffer. err: %v\n", err)
-		buffer.Reset()
-		buffer.Write([]byte(ctx.PathParam("data")))
-	}
-
-	gzipWriter.Close()
-
 	return *myhttp.NewHttpResponseBuilder().
 		WithHeader("Content-Type", "text/plain").
-		WithHeader("Content-Encoding", "gzip").
-		WithBody(buffer.Bytes()).
+		WithHeader("Content-Encoding", selectedEncoding).
+		WithBody(data).
 		Build()
 }
 
