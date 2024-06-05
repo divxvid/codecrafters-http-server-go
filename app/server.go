@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	myhttp "github.com/codecrafters-io/http-server-starter-go/app/my_http"
 )
@@ -43,8 +44,19 @@ func main() {
 }
 
 func handleEcho(ctx *myhttp.HttpContext) myhttp.HttpResponse {
-	encoding := ctx.GetRequestHeader("Accept-Encoding")
-	if encoding != "gzip" {
+	encodingValues := ctx.GetRequestHeader("Accept-Encoding")
+	encodings := strings.Split(encodingValues, ",")
+
+	var hasGzip bool = false
+	for _, e := range encodings {
+		e = strings.TrimSpace(e)
+		if e == "gzip" {
+			hasGzip = true
+			break
+		}
+	}
+
+	if !hasGzip {
 		return *myhttp.NewHttpResponseBuilder().
 			WithHeader("Content-Type", "text/plain").
 			WithBody([]byte(ctx.PathParam("data"))).
