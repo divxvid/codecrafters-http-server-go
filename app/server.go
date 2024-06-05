@@ -35,7 +35,8 @@ func main() {
 			WithBody([]byte(ctx.GetRequestHeader("User-Agent"))).
 			Build()
 	})
-	router.GET("/files/:filename", handleFiles)
+	router.GET("/files/:filename", handleGetFile)
+	router.POST("/files/:filename", handlePostFile)
 
 	server := myhttp.NewServer(router)
 
@@ -46,7 +47,31 @@ func main() {
 	}
 }
 
-func handleFiles(ctx *myhttp.HttpContext) myhttp.HttpResponse {
+func handlePostFile(ctx *myhttp.HttpContext) myhttp.HttpResponse {
+	fileName := ctx.PathParam("filename")
+	if directory == nil {
+		fmt.Printf("Error parsing the root directory, using /tmp instead")
+		*directory = "/tmp"
+	}
+	fullPath := filepath.Join(*directory, fileName)
+
+	contents := ctx.GetRequestBody()
+	err := os.WriteFile(fullPath, contents, 0777)
+	if err != nil {
+		fmt.Printf("Error writing to the file. err: %v\n", err)
+		return *myhttp.NewHttpResponseBuilder().
+			WithStatusCode(500).
+			WithStatusText("File Write failed").
+			Build()
+	}
+
+	return *myhttp.NewHttpResponseBuilder().
+		WithStatusCode(201).
+		WithStatusText("Created").
+		Build()
+}
+
+func handleGetFile(ctx *myhttp.HttpContext) myhttp.HttpResponse {
 	notFoundResponse := *myhttp.NewHttpResponseBuilder().
 		WithStatusCode(404).
 		WithStatusText("Not Found").

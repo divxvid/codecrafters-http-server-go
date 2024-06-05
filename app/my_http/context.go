@@ -19,3 +19,7 @@ func (ctx *HttpContext) PathParam(key string) string {
 func (ctx *HttpContext) GetRequestHeader(key string) string {
 	return ctx.request.Headers[key]
 }
+
+func (ctx *HttpContext) GetRequestBody() []byte {
+	return ctx.request.Body
+}
