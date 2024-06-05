@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	myhttp "github.com/codecrafters-io/http-server-starter-go/app/my_http"
 )
@@ -27,6 +29,7 @@ func main() {
 			WithBody([]byte(ctx.GetRequestHeader("User-Agent"))).
 			Build()
 	})
+	router.GET("/files/:filename", handleFiles)
 
 	server := myhttp.NewServer(router)
 
@@ -35,4 +38,34 @@ func main() {
 		fmt.Println("There was some error while starting on port 4221")
 		os.Exit(1)
 	}
+}
+
+func handleFiles(ctx *myhttp.HttpContext) myhttp.HttpResponse {
+	fileName := ctx.PathParam("filename")
+	fullPath := filepath.Join("tmp", fileName)
+
+	notFoundResponse := *myhttp.NewHttpResponseBuilder().
+		WithStatusCode(404).
+		WithStatusText("Not Found").
+		Build()
+
+	if !checkFileExists(fullPath) {
+		return notFoundResponse
+	}
+
+	content, err := os.ReadFile(fullPath)
+	if err != nil {
+		fmt.Printf("Error encountered while reading the file: %v\n", err)
+		return notFoundResponse
+	}
+
+	return *myhttp.NewHttpResponseBuilder().
+		WithHeader("Content-Type", "text/octet-stream").
+		WithBody(content).
+		Build()
+}
+
+func checkFileExists(filePath string) bool {
+	_, error := os.Stat(filePath)
+	return !errors.Is(error, os.ErrNotExist)
 }
