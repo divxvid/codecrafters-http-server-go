@@ -23,12 +23,7 @@ func main() {
 	router.GET("/", func(ctx *myhttp.HttpContext) myhttp.HttpResponse {
 		return *myhttp.NewHttpResponseBuilder().Build()
 	})
-	router.GET("/echo/:data", func(ctx *myhttp.HttpContext) myhttp.HttpResponse {
-		return *myhttp.NewHttpResponseBuilder().
-			WithHeader("Content-Type", "text/plain").
-			WithBody([]byte(ctx.PathParam("data"))).
-			Build()
-	})
+	router.GET("/echo/:data", handleEcho)
 	router.GET("/user-agent", func(ctx *myhttp.HttpContext) myhttp.HttpResponse {
 		return *myhttp.NewHttpResponseBuilder().
 			WithHeader("Content-Type", "text/plain").
@@ -45,6 +40,22 @@ func main() {
 		fmt.Println("There was some error while starting on port 4221")
 		os.Exit(1)
 	}
+}
+
+func handleEcho(ctx *myhttp.HttpContext) myhttp.HttpResponse {
+	encoding := ctx.GetRequestHeader("Accept-Encoding")
+	if encoding != "gzip" {
+		return *myhttp.NewHttpResponseBuilder().
+			WithHeader("Content-Type", "text/plain").
+			WithBody([]byte(ctx.PathParam("data"))).
+			Build()
+	}
+
+	return *myhttp.NewHttpResponseBuilder().
+		WithHeader("Content-Type", "text/plain").
+		WithHeader("Content-Encoding", "gzip").
+		WithBody([]byte(ctx.PathParam("data"))).
+		Build()
 }
 
 func handlePostFile(ctx *myhttp.HttpContext) myhttp.HttpResponse {
