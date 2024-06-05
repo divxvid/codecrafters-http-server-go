@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,7 +10,12 @@ import (
 	myhttp "github.com/codecrafters-io/http-server-starter-go/app/my_http"
 )
 
+var directory *string
+
 func main() {
+	directory = flag.String("directory", "/tmp", "root directory of the folder")
+	flag.Parse()
+
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
 
@@ -41,15 +47,22 @@ func main() {
 }
 
 func handleFiles(ctx *myhttp.HttpContext) myhttp.HttpResponse {
-	fileName := ctx.PathParam("filename")
-	fullPath := filepath.Join("tmp", fileName)
-
 	notFoundResponse := *myhttp.NewHttpResponseBuilder().
 		WithStatusCode(404).
 		WithStatusText("Not Found").
 		Build()
 
+	fileName := ctx.PathParam("filename")
+
+	if directory == nil {
+		fmt.Printf("Error parsing the root directory")
+		return notFoundResponse
+	}
+
+	fullPath := filepath.Join(*directory, fileName)
+
 	if !checkFileExists(fullPath) {
+		fmt.Printf("File does not exist: %s\n", fullPath)
 		return notFoundResponse
 	}
 
@@ -60,7 +73,7 @@ func handleFiles(ctx *myhttp.HttpContext) myhttp.HttpResponse {
 	}
 
 	return *myhttp.NewHttpResponseBuilder().
-		WithHeader("Content-Type", "text/octet-stream").
+		WithHeader("Content-Type", "application/octet-stream").
 		WithBody(content).
 		Build()
 }
