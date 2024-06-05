@@ -54,6 +54,8 @@ func FromReader(r io.Reader) (*HttpRequest, error) {
 	for _, line := range headerSections[1:] {
 		parts := strings.SplitN(line, ":", 2)
 		key := strings.TrimSpace(parts[0])
+		//lowercase the key
+		key = strings.ToLower(key)
 		value := strings.TrimSpace(parts[1])
 		headers[key] = value
 	}
