@@ -54,13 +54,13 @@ func (s *Server) ProcessConnection(conn net.Conn) {
 	response, err := s.Router.HandleRequest(request)
 	if err == ErrRouteNotFound {
 		//INFO: just returning a 404 for codecrafters
-		NewHttpResponseBuilder().
-			WithStatusCode(404).
+		NewResponseBuilder().
+			StatusCode(404).
 			Build().
 			WriteToConn(conn)
 	} else if err != nil {
-		NewHttpResponseBuilder().
-			WithStatusCode(500).
+		NewResponseBuilder().
+			StatusCode(500).
 			Build().
 			WriteToConn(conn)
 	} else {

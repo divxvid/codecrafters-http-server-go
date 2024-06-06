@@ -23,13 +23,13 @@ func main() {
 
 	router := myhttp.NewRouter()
 	router.GET("/", func(ctx *myhttp.HttpContext) myhttp.Response {
-		return *myhttp.NewHttpResponseBuilder().Build()
+		return *myhttp.NewResponseBuilder().Build()
 	})
 	router.GET("/echo/:data", handleEcho)
 	router.GET("/user-agent", func(ctx *myhttp.HttpContext) myhttp.Response {
-		return *myhttp.NewHttpResponseBuilder().
-			WithHeader("Content-Type", "text/plain").
-			WithBody([]byte(ctx.GetRequestHeader("User-Agent"))).
+		return *myhttp.NewResponseBuilder().
+			Header("Content-Type", "text/plain").
+			Body([]byte(ctx.GetRequestHeader("User-Agent"))).
 			Build()
 	})
 	router.GET("/files/:filename", handleGetFile)
@@ -51,16 +51,16 @@ func handleEcho(ctx *myhttp.HttpContext) myhttp.Response {
 	compressor := utils.NewCompressor()
 	data, err, selectedEncoding := compressor.Compress(encodings, []byte(ctx.PathParam("data")))
 	if err != nil {
-		return *myhttp.NewHttpResponseBuilder().
-			WithHeader("Content-Type", "text/plain").
-			WithBody(data).
+		return *myhttp.NewResponseBuilder().
+			Header("Content-Type", "text/plain").
+			Body(data).
 			Build()
 	}
 
-	return *myhttp.NewHttpResponseBuilder().
-		WithHeader("Content-Type", "text/plain").
-		WithHeader("Content-Encoding", selectedEncoding).
-		WithBody(data).
+	return *myhttp.NewResponseBuilder().
+		Header("Content-Type", "text/plain").
+		Header("Content-Encoding", selectedEncoding).
+		Body(data).
 		Build()
 }
 
@@ -76,19 +76,19 @@ func handlePostFile(ctx *myhttp.HttpContext) myhttp.Response {
 	err := os.WriteFile(fullPath, contents, 0777)
 	if err != nil {
 		fmt.Printf("Error writing to the file. err: %v\n", err)
-		return *myhttp.NewHttpResponseBuilder().
-			WithStatusCode(500).
+		return *myhttp.NewResponseBuilder().
+			StatusCode(500).
 			Build()
 	}
 
-	return *myhttp.NewHttpResponseBuilder().
-		WithStatusCode(201).
+	return *myhttp.NewResponseBuilder().
+		StatusCode(201).
 		Build()
 }
 
 func handleGetFile(ctx *myhttp.HttpContext) myhttp.Response {
-	notFoundResponse := *myhttp.NewHttpResponseBuilder().
-		WithStatusCode(404).
+	notFoundResponse := *myhttp.NewResponseBuilder().
+		StatusCode(404).
 		Build()
 
 	fileName := ctx.PathParam("filename")
@@ -111,9 +111,9 @@ func handleGetFile(ctx *myhttp.HttpContext) myhttp.Response {
 		return notFoundResponse
 	}
 
-	return *myhttp.NewHttpResponseBuilder().
-		WithHeader("Content-Type", "application/octet-stream").
-		WithBody(content).
+	return *myhttp.NewResponseBuilder().
+		Header("Content-Type", "application/octet-stream").
+		Body(content).
 		Build()
 }
 
