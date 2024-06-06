@@ -1,8 +1,14 @@
 package myhttp
 
 import (
-	"fmt"
+	"errors"
 	"strings"
+)
+
+var (
+	ErrRouteNotFound      = errors.New("Could not find the asked route.")
+	ErrDuplicatePathParam = errors.New("Cannot register two different path params under same prefix")
+	ErrDuplicatePath      = errors.New("Cannot register identical paths")
 )
 
 type node struct {
@@ -52,7 +58,7 @@ func (rt RouterTree) Add(path string, f HandlerFunc) error {
 
 			for _, child := range trav.children {
 				if child.isPathParam {
-					return fmt.Errorf("Cannot register two different path params under same prefix")
+					return ErrDuplicatePathParam
 				}
 			}
 
@@ -64,7 +70,7 @@ func (rt RouterTree) Add(path string, f HandlerFunc) error {
 	}
 
 	if trav.handlerFunc != nil {
-		return fmt.Errorf("Cannot have identical paths")
+		return ErrDuplicatePath
 	}
 
 	trav.handlerFunc = f
@@ -103,7 +109,7 @@ func (rt RouterTree) GetHandler(ctx *HttpContext) (HandlerFunc, error) {
 			}
 
 			if !hasChildWithPathParam {
-				return nil, fmt.Errorf("Could not find handler function for this prefix")
+				return nil, ErrRouteNotFound
 			}
 			continue
 		}
@@ -111,7 +117,7 @@ func (rt RouterTree) GetHandler(ctx *HttpContext) (HandlerFunc, error) {
 	}
 
 	if trav.handlerFunc == nil {
-		return nil, fmt.Errorf("Could not find handler function for this prefix")
+		return nil, ErrRouteNotFound
 	}
 
 	return trav.handlerFunc, nil

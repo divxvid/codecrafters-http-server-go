@@ -1,6 +1,6 @@
 package myhttp
 
-type HandlerFunc func(*HttpContext) HttpResponse
+type HandlerFunc func(*HttpContext) Response
 
 type Router struct {
 	routes map[string]RouterTree
@@ -38,7 +38,7 @@ func (r *Router) DELETE(path string, f HandlerFunc) error {
 	return r.routes["DELETE"].Add(path, f)
 }
 
-func (r *Router) HandleRequest(request *HttpRequest) (*HttpResponse, error) {
+func (r *Router) HandleRequest(request *Request) (*Response, error) {
 	ctx := NewHttpContext(request)
 	f, err := r.routes[request.RequestLine.HttpMethod].GetHandler(ctx)
 	if err != nil {

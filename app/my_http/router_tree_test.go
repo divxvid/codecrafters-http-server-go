@@ -4,31 +4,31 @@ import "testing"
 
 func TestRouterTreeGood(t *testing.T) {
 	rt := NewRouterTree()
-	rt.Add("/", func(hc *HttpContext) HttpResponse {
+	rt.Add("/", func(hc *HttpContext) Response {
 		return *NewHttpResponseBuilder().
 			WithBody([]byte("Root")).
 			Build()
 	})
 
-	rt.Add("/hello", func(hc *HttpContext) HttpResponse {
+	rt.Add("/hello", func(hc *HttpContext) Response {
 		return *NewHttpResponseBuilder().
 			WithBody([]byte("Hola")).
 			Build()
 	})
 
-	rt.Add("/echo/:data", func(hc *HttpContext) HttpResponse {
+	rt.Add("/echo/:data", func(hc *HttpContext) Response {
 		return *NewHttpResponseBuilder().
 			WithBody([]byte(hc.pathParams["data"])).
 			Build()
 	})
 
-	rt.Add("/:first/:second/:third", func(hc *HttpContext) HttpResponse {
+	rt.Add("/:first/:second/:third", func(hc *HttpContext) Response {
 		return *NewHttpResponseBuilder().
 			WithBody([]byte("LotsOfPathParams")).
 			Build()
 	})
 
-	c1 := NewHttpContext(&HttpRequest{
+	c1 := NewHttpContext(&Request{
 		RequestLine: RequestLine{
 			Target: "/",
 		},
@@ -44,7 +44,7 @@ func TestRouterTreeGood(t *testing.T) {
 		t.Fatalf("Root Body not equal. Want: Root, Got: %s", string(resp1.Body))
 	}
 
-	c2 := NewHttpContext(&HttpRequest{
+	c2 := NewHttpContext(&Request{
 		RequestLine: RequestLine{
 			Target: "/hello",
 		},
@@ -60,7 +60,7 @@ func TestRouterTreeGood(t *testing.T) {
 		t.Fatalf("Hello Body not equal. Want: Root, Got: %s", string(resp1.Body))
 	}
 
-	c3 := NewHttpContext(&HttpRequest{
+	c3 := NewHttpContext(&Request{
 		RequestLine: RequestLine{
 			Target: "/echo/omegalul",
 		},
@@ -76,7 +76,7 @@ func TestRouterTreeGood(t *testing.T) {
 		t.Fatalf("Echo Body not equal. Want: omegalul, Got: %s", string(resp1.Body))
 	}
 
-	c4 := NewHttpContext(&HttpRequest{
+	c4 := NewHttpContext(&Request{
 		RequestLine: RequestLine{
 			Target: "/this/is/cool",
 		},
@@ -106,7 +106,7 @@ func TestRouterTreeGood(t *testing.T) {
 func TestRouterTreeBad(t *testing.T) {
 	rt := NewRouterTree()
 
-	c := NewHttpContext(&HttpRequest{
+	c := NewHttpContext(&Request{
 		RequestLine: RequestLine{
 			Target: "Omega",
 		},

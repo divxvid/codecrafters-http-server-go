@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-type HttpRequest struct {
+type Request struct {
 	RequestLine RequestLine
 	Headers     map[string]string
 	Body        []byte
@@ -20,7 +20,7 @@ type RequestLine struct {
 	Version    string
 }
 
-func FromReader(r io.Reader) (*HttpRequest, error) {
+func FromReader(r io.Reader) (*Request, error) {
 	var buf []byte
 	buffer := bytes.NewBuffer(buf)
 
@@ -60,7 +60,7 @@ func FromReader(r io.Reader) (*HttpRequest, error) {
 		headers[key] = value
 	}
 
-	return &HttpRequest{
+	return &Request{
 		RequestLine: RequestLine{
 			HttpMethod: strings.TrimSpace(requestLineStr[0]),
 			Target:     strings.TrimSpace(requestLineStr[1]),
@@ -71,7 +71,7 @@ func FromReader(r io.Reader) (*HttpRequest, error) {
 	}, nil
 }
 
-func (hr *HttpRequest) String() string {
+func (hr *Request) String() string {
 	var buf []byte
 	buffer := bytes.NewBuffer(buf)
 
@@ -92,7 +92,7 @@ func (hr *HttpRequest) String() string {
 	return buffer.String()
 }
 
-func (hr *HttpRequest) PathParams() []string {
+func (hr *Request) PathParams() []string {
 	params := strings.Split(hr.RequestLine.Target, "/")[1:] //ignore the first space
 	length := len(params)
 	if length > 0 && params[length-1] == "" {

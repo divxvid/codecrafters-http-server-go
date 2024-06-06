@@ -22,11 +22,11 @@ func main() {
 	fmt.Println("Logs from your program will appear here!")
 
 	router := myhttp.NewRouter()
-	router.GET("/", func(ctx *myhttp.HttpContext) myhttp.HttpResponse {
+	router.GET("/", func(ctx *myhttp.HttpContext) myhttp.Response {
 		return *myhttp.NewHttpResponseBuilder().Build()
 	})
 	router.GET("/echo/:data", handleEcho)
-	router.GET("/user-agent", func(ctx *myhttp.HttpContext) myhttp.HttpResponse {
+	router.GET("/user-agent", func(ctx *myhttp.HttpContext) myhttp.Response {
 		return *myhttp.NewHttpResponseBuilder().
 			WithHeader("Content-Type", "text/plain").
 			WithBody([]byte(ctx.GetRequestHeader("User-Agent"))).
@@ -44,7 +44,7 @@ func main() {
 	}
 }
 
-func handleEcho(ctx *myhttp.HttpContext) myhttp.HttpResponse {
+func handleEcho(ctx *myhttp.HttpContext) myhttp.Response {
 	encodingValues := ctx.GetRequestHeader("Accept-Encoding")
 	encodings := strings.Split(encodingValues, ",")
 
@@ -64,7 +64,7 @@ func handleEcho(ctx *myhttp.HttpContext) myhttp.HttpResponse {
 		Build()
 }
 
-func handlePostFile(ctx *myhttp.HttpContext) myhttp.HttpResponse {
+func handlePostFile(ctx *myhttp.HttpContext) myhttp.Response {
 	fileName := ctx.PathParam("filename")
 	if directory == nil {
 		fmt.Printf("Error parsing the root directory, using /tmp instead")
@@ -78,20 +78,17 @@ func handlePostFile(ctx *myhttp.HttpContext) myhttp.HttpResponse {
 		fmt.Printf("Error writing to the file. err: %v\n", err)
 		return *myhttp.NewHttpResponseBuilder().
 			WithStatusCode(500).
-			WithStatusText("File Write failed").
 			Build()
 	}
 
 	return *myhttp.NewHttpResponseBuilder().
 		WithStatusCode(201).
-		WithStatusText("Created").
 		Build()
 }
 
-func handleGetFile(ctx *myhttp.HttpContext) myhttp.HttpResponse {
+func handleGetFile(ctx *myhttp.HttpContext) myhttp.Response {
 	notFoundResponse := *myhttp.NewHttpResponseBuilder().
 		WithStatusCode(404).
-		WithStatusText("Not Found").
 		Build()
 
 	fileName := ctx.PathParam("filename")

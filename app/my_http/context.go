@@ -3,11 +3,11 @@ package myhttp
 import "strings"
 
 type HttpContext struct {
-	request    *HttpRequest
+	request    *Request
 	pathParams map[string]string
 }
 
-func NewHttpContext(req *HttpRequest) *HttpContext {
+func NewHttpContext(req *Request) *HttpContext {
 	return &HttpContext{
 		request:    req,
 		pathParams: make(map[string]string),
